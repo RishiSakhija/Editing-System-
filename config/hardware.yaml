@@ -1,0 +1,157 @@
+# AutoEdit Pro — Hardware Profiles
+# Auto-selected based on detected GPU, or manually set via HARDWARE_PROFILE env var
+
+profiles:
+  # RTX 2050 4GB (Target hardware)
+  rtx_2050_4gb:
+    name: "NVIDIA RTX 2050 (4GB VRAM)"
+    gpu:
+      enabled: true
+      memory_fraction: 0.80
+      offload_layers: 24            # Offload more layers to fit 7B model
+      flash_attention: true
+      tensor_split: null
+    cpu_threads: 6
+    models:
+      llm:
+        model: "qwen2.5:7b-instruct-q4_K_M"
+        num_gpu_layers: 8           # Only 8 layers on GPU
+        num_batch: 256
+      whisper:
+        precision: "int8"
+      vision:
+        half_precision: true
+      embeddings:
+        provider: "onnx"
+        device: "cpu"               # Keep embeddings on CPU
+    pipeline:
+      assets:
+        max_concurrent_downloads: 3
+      timeline:
+        render_codec: "h264_nvenc"
+        render_preset: "p5"
+
+  # RTX 3060 12GB / 4060 8GB
+  rtx_3060_12gb:
+    name: "NVIDIA RTX 3060/4060 (8-12GB VRAM)"
+    gpu:
+      enabled: true
+      memory_fraction: 0.90
+      offload_layers: 0             # Full model on GPU
+      flash_attention: true
+    cpu_threads: 8
+    models:
+      llm:
+        model: "qwen2.5:7b-instruct-q4_K_M"
+        num_gpu_layers: -1
+        num_batch: 512
+      whisper:
+        precision: "float16"
+      vision:
+        half_precision: true
+      embeddings:
+        provider: "onnx"
+        device: "cuda"
+    pipeline:
+      assets:
+        max_concurrent_downloads: 6
+      timeline:
+        render_codec: "hevc_nvenc"
+        render_preset: "p6"
+
+  # RTX 3090/4090 24GB
+  rtx_4090_24gb:
+    name: "NVIDIA RTX 3090/4090 (24GB VRAM)"
+    gpu:
+      enabled: true
+      memory_fraction: 0.95
+      offload_layers: 0
+      flash_attention: true
+    cpu_threads: 16
+    models:
+      llm:
+        model: "qwen2.5:14b-instruct-q4_K_M"  # Can run larger model
+        num_gpu_layers: -1
+        num_batch: 1024
+      whisper:
+        precision: "float16"
+      vision:
+        half_precision: true
+      embeddings:
+        provider: "sentence-transformers"
+        device: "cuda"
+    pipeline:
+      assets:
+        max_concurrent_downloads: 8
+      timeline:
+        render_codec: "hevc_nvenc"
+        render_preset: "p7"
+
+  # Apple Silicon (M1/M2/M3)
+  apple_silicon:
+    name: "Apple Silicon (M1/M2/M3)"
+    gpu:
+      enabled: true
+      memory_fraction: 0.70         # Unified memory
+      offload_layers: 0
+      flash_attention: false        # Metal doesn't support FA yet
+      tensor_split: null
+    cpu_threads: 8
+    models:
+      llm:
+        model: "qwen2.5:7b-instruct-q4_K_M"
+        num_gpu_layers: -1          # Metal acceleration
+        num_batch: 512
+      whisper:
+        precision: "float16"
+      vision:
+        half_precision: true
+      embeddings:
+        provider: "sentence-transformers"
+        device: "mps"
+    pipeline:
+      assets:
+        max_concurrent_downloads: 4
+      timeline:
+        render_codec: "h264_videotoolbox"
+        render_preset: "medium"
+
+  # CPU Only (No GPU)
+  cpu_only:
+    name: "CPU Only (No Dedicated GPU)"
+    gpu:
+      enabled: false
+      memory_fraction: 0
+      offload_layers: 999           # All layers on CPU
+    cpu_threads: 8
+    models:
+      llm:
+        model: "qwen2.5:3b-instruct-q4_K_M"  # Smaller model for CPU
+        num_gpu_layers: 0
+        num_batch: 128
+      whisper:
+        precision: "int8"
+      vision:
+        half_precision: false
+      embeddings:
+        provider: "onnx"
+        device: "cpu"
+    pipeline:
+      assets:
+        max_concurrent_downloads: 2
+      timeline:
+        render_codec: "libx264"
+        render_preset: "medium"
+
+# Auto-detection rules
+detection:
+  gpu_vendors:
+    - "nvidia"
+    - "amd"
+    - "intel"
+    - "apple"
+  vram_thresholds:
+    low: 4          # GB - use rtx_2050_4gb profile
+    medium: 8       # GB - use rtx_3060_12gb profile
+    high: 16        # GB - use rtx_4090_24gb profile
+  cpu_fallback: "cpu_only"

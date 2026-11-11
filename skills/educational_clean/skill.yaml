@@ -1,0 +1,267 @@
+# Educational Clean Skill Pack
+# Style: Ali Abdaal, Thomas Frank, Matt D'Avella
+# Clean, retention-optimized educational talking head
+
+metadata:
+  name: "educational_clean"
+  version: "2.1.0"
+  category: "talking_head_educational"
+  source: "curated_from_top_creators"
+  tags:
+    - "talking_head"
+    - "educational"
+    - "retention"
+    - "clean"
+    - "professional"
+  description: |
+    Clean educational style optimized for retention.
+    Moderate pacing, strategic zooms on key insights,
+    relevant B-roll for concept visualization,
+    professional captions with word-by-word animation.
+
+llm_few_shots:
+  # Key insight emphasis
+  - context: "Explaining a core concept or framework"
+    transcript: "The key insight here is that attention is all you need for transformer models"
+    decisions:
+      - action: "zoom"
+        timestamp: 0.0
+        duration: 2.0
+        intensity: 1.2
+        params: {trigger: "key_insight", easing: "ease_out"}
+        reason: "Emphasize the key insight with a subtle zoom"
+        confidence: 0.9
+      - action: "caption_highlight"
+        timestamp: 0.0
+        params: {words: ["attention is all you need"], style: "bold_accent"}
+        reason: "Highlight the key phrase in captions"
+        confidence: 0.85
+
+  # Data/statistics visualization
+  - context: "Citing research or statistics"
+    transcript: "Studies show that 73% of learners retain more with visual aids"
+    decisions:
+      - action: "broll"
+        timestamp: 0.0
+        duration: 5.0
+        params:
+          query: "data visualization chart statistics abstract"
+          sources: ["pexels", "pixabay"]
+          min_relevance: 0.7
+        reason: "Visualize the statistic with relevant B-roll"
+        confidence: 0.88
+      - action: "caption_highlight"
+        timestamp: 0.0
+        params: {words: ["73%"], style: "bold_number"}
+        reason: "Make the number pop in captions"
+        confidence: 0.9
+
+  # Transition to new section
+  - context: "Moving to a new topic or chapter"
+    transcript: "Now let's talk about the second principle: positional encoding"
+    decisions:
+      - action: "transition"
+        timestamp: 0.0
+        params: {type: "smooth_crossfade", duration: 0.5}
+        reason: "Smooth transition to new section"
+        confidence: 0.8
+      - action: "caption_highlight"
+        timestamp: 0.0
+        params: {words: ["second principle", "positional encoding"], style: "section_title"}
+        reason: "Signal new section in captions"
+        confidence: 0.85
+
+  # Silence removal
+  - context: "Natural pause in speech"
+    transcript: "[silence 0.6s]"
+    decisions:
+      - action: "cut"
+        timestamp: 0.0
+        params: {remove_silence: true, keep_duration: 0.3}
+        reason: "Remove dead air > 0.4s, keep natural breath"
+        confidence: 0.95
+
+  # Filler word removal
+  - context: "Speaker uses filler words"
+    transcript: "So, um, the thing is, like, you know, it's actually quite simple"
+    decisions:
+      - action: "cut"
+        timestamp: 0.0
+        params: {remove_fillers: ["um", "uh", "like", "you know", "so", "actually"]}
+        reason: "Remove filler words for cleaner delivery"
+        confidence: 0.9
+
+  # Example/story visualization
+  - context: "Telling a story or giving an example"
+    transcript: "Imagine you're building a house. You need a blueprint first."
+    decisions:
+      - action: "broll"
+        timestamp: 0.0
+        duration: 4.0
+        params:
+          query: "blueprint architecture planning construction"
+          sources: ["unsplash", "pexels"]
+        reason: "Visualize the analogy with relevant imagery"
+        confidence: 0.82
+
+  # Code/technical concept
+  - context: "Explaining code or technical implementation"
+    transcript: "The function takes an input tensor and applies layer normalization"
+    decisions:
+      - action: "broll"
+        timestamp: 0.0
+        duration: 3.0
+        params:
+          query: "code programming abstract software development"
+          sources: ["pexels", "pixabay"]
+        reason: "Show coding/technical B-roll"
+        confidence: 0.75
+      - action: "zoom"
+        timestamp: 0.0
+        duration: 1.5
+        intensity: 1.15
+        params: {trigger: "technical_term"}
+        reason: "Subtle zoom on technical terms"
+        confidence: 0.7
+
+  # Call to action / summary
+  - context: "Ending with summary or CTA"
+    transcript: "To summarize, the three principles are attention, position, and feedforward"
+    decisions:
+      - action: "zoom"
+        timestamp: 0.0
+        duration: 2.0
+        intensity: 1.1
+        params: {trigger: "summary"}
+        reason: "Gentle zoom for summary points"
+        confidence: 0.8
+      - action: "transition"
+        timestamp: 0.0
+        params: {type: "fade_to_black", duration: 1.0}
+        reason: "Clean ending transition"
+        confidence: 0.85
+
+style_defaults:
+  caption:
+    font_family: "Inter"
+    font_weight: 600
+    font_size_relative: 0.042
+    color: "#FFFFFF"
+    stroke_color: "#000000"
+    stroke_width: 2
+    position: "lower_third"
+    animation: "word_by_word_fade"
+    max_chars_per_line: 36
+    line_spacing: 1.3
+    highlight_styles:
+      bold_accent: {weight: 700, color: "#00D4AA", scale: 1.05}
+      bold_number: {weight: 800, color: "#FFD700", scale: 1.1}
+      section_title: {weight: 700, color: "#FFFFFF", background: "rgba(0,212,170,0.3)", padding: 4}
+      key_term: {weight: 600, color: "#00D4AA", italic: true}
+
+  music:
+    genres:
+      - "ambient_electronic"
+      - "lofi_hiphop"
+      - "minimal_piano"
+      - "corporate_uplifting"
+    moods:
+      - "focused"
+      - "curious"
+      - "calm"
+      - "inspiring"
+    bpm_range: [75, 95]
+    ducking_db: -18
+    fade_in_sec: 1.5
+    fade_out_sec: 2.0
+    preferred_sources: ["freesound", "youtube_audio_library", "pixabay_music"]
+
+  transitions:
+    default:
+      type: "smooth_crossfade"
+      duration: 0.4
+      easing: "ease_in_out"
+    emphasis:
+      type: "zoom_punch"
+      duration: 0.6
+      intensity: 1.25
+      easing: "ease_out"
+    broll_enter:
+      type: "whip_pan"
+      direction: "auto"
+      duration: 0.3
+      easing: "ease_out"
+    broll_exit:
+      type: "match_cut"
+      duration: 0.2
+      easing: "ease_in_out"
+    section_change:
+      type: "smooth_crossfade"
+      duration: 0.6
+      easing: "ease_in_out"
+
+  pacing:
+    max_silence_keep: 0.4
+    min_cut_interval: 1.5
+    max_cut_interval: 10.0
+    beat_sync_tolerance: 0.15
+    preferred_cut_on: "downbeat"
+    zoom_frequency: "moderate"  # low, moderate, high
+
+  color:
+    lut: "educational_clean/assets/clean_look.cube"
+    exposure_match: true
+    skin_tone_protect: true
+    contrast_boost: 0.05
+    saturation: 1.05
+
+  effects:
+    zoom:
+      default_intensity: 1.15
+      max_intensity: 1.5
+      easing: "ease_out"
+      duration_range: [1.0, 3.0]
+    punch_in:
+      intensity: 1.3
+      duration: 0.5
+      trigger_keywords: ["key", "important", "crucial", "essential", "remember", "note that"]
+    lower_third:
+      enabled: true
+      style: "minimal"
+      animation: "slide_up_fade"
+
+asset_preferences:
+  broll_sources: ["pexels", "pixabay", "unsplash", "coverr"]
+  broll_query_mapping:
+    "attention mechanism": ["neural network visualization", "attention weights heatmap", "transformer architecture"]
+    "data/statistics": ["data visualization abstract", "charts graphs analytics", "dashboard metrics"]
+    "learning/memory": ["brain neurons synapse", "learning process abstract", "memory formation"]
+    "coding/software": ["programming code abstract", "software development", "IDE screen recording"]
+    "business/money": ["financial growth chart", "business meeting abstract", "entrepreneurship"]
+    "productivity": ["focused work desk", "time management abstract", "workflow optimization"]
+    "science/research": ["laboratory research abstract", "scientific visualization", "experiment data"]
+    "technology/AI": ["artificial intelligence abstract", "neural network", "futuristic technology"]
+    "creativity/design": ["creative process abstract", "design thinking", "artistic workflow"]
+    "communication": ["public speaking abstract", "communication concept", "presentation"]
+    "health/wellness": ["meditation mindfulness", "healthy lifestyle", "wellness abstract"]
+  music_mood_mapping:
+    "intro": ["inspiring", "curious"]
+    "explanation": ["focused", "calm"]
+    "example": ["curious", "inspiring"]
+    "technical": ["focused", "calm"]
+    "summary": ["inspiring", "calm"]
+    "outro": ["calm", "inspiring"]
+  sfx_preferences:
+    enabled: true
+    volume_db: -12
+    triggers:
+      zoom_in: "whoosh_subtle"
+      transition: "soft_pop"
+      broll_cut: "camera_shutter_quiet"
+      highlight: "ding_subtle"
+
+learning:
+  few_shot_update_threshold: 0.15
+  max_examples: 20
+  preference_decay: 0.95
+  embedder_model: "bge-small-en-v1.5"

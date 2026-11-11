@@ -1,0 +1,281 @@
+# AutoEdit Pro — Default Configuration
+# All settings can be overridden via environment variables or config/secrets.yaml
+
+# ============================================================
+# HARDWARE & PERFORMANCE
+# ============================================================
+hardware:
+  # GPU configuration (auto-detected if not specified)
+  gpu:
+    enabled: true
+    device_id: 0                    # GPU index (0 = first)
+    memory_fraction: 0.85           # Max VRAM usage (0.0-1.0)
+    offload_layers: 20              # LLM layers to offload to CPU (for 4GB VRAM)
+    flash_attention: true           # Use flash attention if available
+    tensor_split: null              # Multi-GPU split (e.g., "0.5,0.5")
+
+  # CPU threads for parallel operations
+  cpu_threads: 8
+
+  # Model precision
+  quantization: "q4_K_M"            # GGUF quantization for LLMs
+  whisper_precision: "int8"         # Whisper.cpp precision
+
+  # Cache directories
+  cache_dir: "./data/cache"
+  models_dir: "./data/models"
+  db_dir: "./data/db"
+
+# ============================================================
+# MODEL CONFIGURATION
+# ============================================================
+models:
+  # LLM (Ollama) - Edit decisions, viral scoring, skill extraction
+  llm:
+    provider: "ollama"
+    host: "http://localhost:11434"
+    model: "qwen2.5:7b-instruct-q4_K_M"
+    fallback_models:
+      - "llama3.2:3b-instruct-q4_K_M"
+      - "qwen2.5:3b-instruct-q4_K_M"
+    temperature: 0.2
+    top_p: 0.9
+    max_tokens: 4096
+    timeout: 120
+    structured_output: true         # Use JSON schema enforcement
+    context_window: 8192
+    num_ctx: 8192
+    num_batch: 512
+    num_gpu_layers: -1              # -1 = all (adjusted by hardware.offload_layers)
+
+  # Transcription (Whisper.cpp)
+  whisper:
+    model: "large-v3-turbo"
+    language: "en"
+    translate: false
+    vad: true                       # Voice activity detection
+    vad_threshold: 0.5
+    min_silence_duration: 0.3       # Seconds
+    word_timestamps: true
+    hallucination_filter: true
+    temperature: 0.0
+    best_of: 1
+    beam_size: 5
+
+  # Face/Object Detection (YOLO)
+  vision:
+    face_model: "yolov8n-face"
+    seg_model: "yolov8n-seg"
+    conf_threshold: 0.45
+    iou_threshold: 0.5
+    max_det: 10
+    tracker: "bytetrack"            # byte track for face tracking
+    tracker_config: "config/trackers/bytetrack.yaml"
+
+  # Embeddings (for skills, preferences, asset ranking)
+  embeddings:
+    model: "bge-small-en-v1.5"
+    provider: "onnx"                # onnx, sentence-transformers
+    dimension: 384
+    normalize: true
+    batch_size: 32
+
+# ============================================================
+# PIPELINE STAGES
+# ============================================================
+pipeline:
+  # Ingestion
+  ingestion:
+    sync_audio_video: true
+    script_alignment: true
+    rough_cut_from_script: true
+    supported_video_ext: [".mp4", ".mov", ".mkv", ".webm", ".avi"]
+    supported_audio_ext: [".wav", ".mp3", ".m4a", ".aac", ".flac"]
+    supported_image_ext: [".jpg", ".jpeg", ".png", ".webp", ".heic"]
+
+  # Analysis
+  analysis:
+    scene_detection:
+      enabled: true
+      threshold: 27.0
+      min_scene_len: 0.5
+    face_tracking:
+      enabled: true
+      min_face_size: 50
+      smooth_factor: 0.3
+    beat_detection:
+      enabled: true
+      method: "madmom"              # madmom, librosa
+      fps: 100
+
+  # Decision Engine
+  decision:
+    max_decisions_per_segment: 5
+    min_confidence: 0.6
+    few_shot_k: 8                   # Number of few-shot examples
+    few_shot_diversity: 0.7         # MMR lambda
+    skill_injection: true
+    user_prefs_injection: true
+    validation:
+      no_overlapping_cuts: true
+      max_zoom_intensity: 2.0
+      max_broll_duration: 15.0
+      min_cut_interval: 0.5
+
+  # Asset Resolution
+  assets:
+    max_results_per_query: 20
+    cache_ttl_days: 30
+    download_timeout: 60
+    max_concurrent_downloads: 4
+    prefer_vertical_for_shorts: true
+    min_broll_resolution: "720p"
+    max_broll_duration: 10.0
+
+  # Timeline Building
+  timeline:
+    target_fps: 30
+    target_resolution: "1920x1080"
+    track_layout:
+      video_main: 1
+      video_broll: 2
+      video_graphics: 3
+      audio_voice: 1
+      audio_music: 2
+      audio_sfx: 3
+    color_space: "rec709"
+    render_codec: "h264_nvenc"      # h264_nvenc, hevc_nvenc, libx264
+    render_preset: "p6"             # NVENC preset
+    render_crf: 18
+    render_bitrate: "25M"
+
+  # Learning
+  learning:
+    enabled: true
+    embedding_update_threshold: 0.15
+    few_shot_max_examples: 20
+    preference_decay: 0.95
+    skill_update_on_every_video: true
+
+  # Viral Scoring
+  scoring:
+    enabled: true
+    platform: "youtube"             # youtube, tiktok, instagram, shorts
+    weights:
+      hook_strength: 0.30
+      pacing_health: 0.20
+      retention_curve: 0.25
+      platform_compliance: 0.15
+      audio_quality: 0.10
+
+# ============================================================
+# FREE API PROVIDERS
+# ============================================================
+apis:
+  pexels:
+    enabled: true
+    base_url: "https://api.pexels.com/v1"
+    rate_limit: 200                 # per hour
+    video_min_duration: 5
+    video_max_duration: 30
+    photo_min_size: "1920x1080"
+
+  pixabay:
+    enabled: true
+    base_url: "https://pixabay.com/api"
+    rate_limit: 100                 # per minute
+    video_min_duration: 5
+    safesearch: true
+
+  unsplash:
+    enabled: true
+    base_url: "https://api.unsplash.com"
+    rate_limit: 50                  # per hour
+    min_width: 1920
+
+  freesound:
+    enabled: true
+    base_url: "https://freesound.org/apiv2"
+    rate_limit: 100                 # per day
+    min_duration: 0.5
+    max_duration: 30
+
+  youtube_audio_library:
+    enabled: true
+    csv_path: "./data/assets/youtube_audio_library.csv"
+    # Download from YouTube Studio > Audio Library > Export CSV
+
+# ============================================================
+# SKILL SYSTEM
+# ============================================================
+skills:
+  directory: "./skills"
+  auto_discover: true
+  bundled_packs:
+    - "educational_clean"
+    - "high_retention_viral"
+    - "documentary_cinematic"
+    - "tech_review"
+    - "shorts_reels"
+    - "podcast_clips"
+  default_pack: "educational_clean"
+  discovery:
+    enabled: true
+    schedule: "weekly"              # weekly, manual
+    sources:
+      github: true
+      huggingface: true
+      reddit: true
+      youtube: false                # Requires API key
+    max_new_packs_per_run: 3
+
+# ============================================================
+# REVIEW UI (STREAMLIT)
+# ============================================================
+ui:
+  host: "localhost"
+  port: 8501
+  theme:
+    base: "dark"
+    primary_color: "#00D4AA"
+    background_color: "#0E1117"
+    secondary_background_color: "#262730"
+    text_color: "#FAFAFA"
+  preview:
+    enable_davinci_live: true
+    frame_accurate: true
+    thumbnail_size: [320, 180]
+  asset_picker:
+    results_per_page: 12
+    preview_on_hover: true
+
+# ============================================================
+# EXPORT SETTINGS
+# ============================================================
+export:
+  formats:
+    - "davinci"                     # .drx project
+    - "fcp_xml"                     # Final Cut Pro XML
+    - "mp4"                         # Direct render
+  davinci:
+    project_name_template: "{video_name}_autoedit_{timestamp}"
+    timeline_name_template: "Main"
+    render_preset: "YouTube 2160p"
+  mp4:
+    codec: "h264_nvenc"
+    preset: "p6"
+    crf: 18
+    audio_codec: "aac"
+    audio_bitrate: "192k"
+
+# ============================================================
+# LOGGING
+# ============================================================
+logging:
+  level: "INFO"                     # DEBUG, INFO, WARNING, ERROR
+  format: "json"                    # json, console
+  file: "./logs/autoedit.log"
+  max_bytes: 10485760               # 10MB
+  backup_count: 5
+  structured: true
+  rich_console: true

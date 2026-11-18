@@ -39,7 +39,7 @@ dependencies = [
     "numpy>=1.26",
     "scipy>=1.13",
     "librosa>=0.11",
-    "madmom>=0.16",
+    # "madmom>=0.16",  # Optional - requires MSVC on Windows
     "onnxruntime>=1.19",
     "sentence-transformers>=3.0",
     "faiss-cpu>=1.8",
@@ -80,8 +80,11 @@ gpu = [
     "onnxruntime-gpu>=1.19",
     "torch>=2.4",
 ]
+beat = [
+    "madmom>=0.16",
+]
 all = [
-    "autoedit-pro[dev,docs,gpu]"
+    "autoedit-pro[dev,docs,gpu,beat]"
 ]
 
 [project.urls]
@@ -113,12 +116,6 @@ packages = ["autoedit"]
 [tool.ruff]
 target-version = "py311"
 line-length = 100
-indent-style = "space"
-indent-width = 4
-quote-style = "double"
-docstring-code-format = true
-docstring-code-line-length = 88
-respect-docstring-whitespace = true
 
 [tool.ruff.lint]
 select = [
@@ -145,10 +142,9 @@ ignore = [
     "PTH118", "PTH120",  # os.path usage
     "TRY003",  # bare except
 ]
-per-file-ignores = {
-    "tests/*": ["S101", "S106"],  # assert, hardcoded secrets in tests
-    "scripts/*": ["S101", "T201", "T203"],  # scripts can print
-}
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "S106"]
+"scripts/*" = ["S101", "T201", "T203"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["autoedit"]
